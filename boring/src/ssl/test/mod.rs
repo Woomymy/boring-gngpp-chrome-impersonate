@@ -23,6 +23,7 @@ use crate::pkey::PKey;
 use crate::srtp::SrtpProfileId;
 use crate::ssl;
 use crate::ssl::test::server::Server;
+use crate::ssl::CertCompressionAlgorithm;
 use crate::ssl::SslVersion;
 use crate::ssl::{
     Error, ExtensionType, HandshakeError, MidHandshakeSslStream, ShutdownResult, ShutdownState,
@@ -1114,4 +1115,23 @@ fn session_cache_size() {
     ctx.set_session_cache_size(1234);
     let ctx = ctx.build();
     assert_eq!(ctx.session_cache_size(), 1234);
+}
+
+#[test]
+fn cert_compression() {
+    let mut server = Server::builder();
+    server
+        .ctx()
+        .add_cert_compression_alg(CertCompressionAlgorithm::Brotli)
+        .unwrap();
+
+    let server = server.build();
+
+    let mut client = server.client();
+    client
+        .ctx()
+        .add_cert_compression_alg(CertCompressionAlgorithm::Brotli)
+        .unwrap();
+
+    client.connect();
 }
